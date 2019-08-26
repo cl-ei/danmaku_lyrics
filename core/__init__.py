@@ -43,7 +43,7 @@ def executor(message, bili_jct, SESSDATA, room_id):
     }
     try:
         r = requests.post(url=req_url, headers=headers, data=data)
-        print(r.status_code)
+        print(r.status_code, r.content.decode("utf-8"))
     except Exception as e:
         print(f"Exception: {e}")
 

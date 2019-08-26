@@ -1,11 +1,10 @@
-import os
 import time
 import sys
 import pygame
 import logging
 import requests
 from threading import Thread
-from pygame.constants import QUIT, KEYUP, K_UP, K_DOWN, K_LEFT, K_RIGHT
+from pygame.constants import QUIT, KEYUP, K_LEFT, K_RIGHT
 
 
 log_format = logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s")
@@ -17,12 +16,44 @@ console_logger.addHandler(console)
 logging = console_logger
 
 
-def executor(content):
-    print(">>> %s" % content)
+def executor(message, bili_jct, SESSDATA, room_id):
+    req_url = "https://api.live.bilibili.com/msg/send"
+    headers = {
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;"
+            "q=0.9,image/webp,image/apng,*/*;q=0.8"
+        ),
+        "User-Agent": (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/70.0.3538.110 Safari/537.36"
+        ),
+        "Cookie": f"bili_jct={bili_jct}; SESSDATA={SESSDATA};",
+    }
+    data = {
+        "color": 0xffffff,
+        "fontsize": 25,
+        "mode": 1,
+        "msg": message,
+        "rnd": int(time.time()),
+        "roomid": room_id,
+        "bubble": 0,
+        "csrf_token": bili_jct,
+        "csrf": bili_jct,
+    }
+    try:
+        r = requests.post(url=req_url, headers=headers, data=data)
+        print(r.status_code)
+    except Exception as e:
+        print(f"Exception: {e}")
 
 
 class Core:
-    def __init__(self):
+    def __init__(self, bili_jct, SESSDATA, room_id):
+        self.bili_jct = bili_jct
+        self.SESSDATA = SESSDATA
+        self.room_id = room_id
+
         self.caption = "坏蛋！"
         self.icon_file = "source/icon.png"
         self.font_file = "source/ncsj.ttf"
@@ -143,7 +174,7 @@ class Core:
                     print(body, self.lyric_content[scan_index], index, scan_index)
                     index += 1
 
-                    t = Thread(target=executor, args=(body, ))
+                    t = Thread(target=executor, args=(body, self.bili_jct, self.SESSDATA, self.room_id))
                     t.setDaemon(True)
                     t.start()
                     break

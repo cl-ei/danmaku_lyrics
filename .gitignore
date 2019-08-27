@@ -4,6 +4,7 @@ node_modules
 .idea
 __pycache__
 .DS_Store
+*.dat
 package-lock.json
 config/proj_config.json
 madliar.settings.ini
